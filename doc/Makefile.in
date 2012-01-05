@@ -506,7 +506,7 @@ info: info-am
 
 info-am: $(INFO_DEPS)
 
-install-data-am: install-man
+install-data-am: install-info-am install-man
 
 install-exec-am:
 
