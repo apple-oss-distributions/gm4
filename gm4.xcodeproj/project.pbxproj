@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 46;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXAggregateTarget section */
@@ -338,6 +338,7 @@
 		FCF25170149DD0A7008F32DD /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 0430;
 				ORGANIZATIONNAME = "Apple Inc.";
 			};
@@ -346,6 +347,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 			);
 			mainGroup = FCF2516E149DD0A7008F32DD;
@@ -371,7 +373,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 1;
 			shellPath = /bin/sh;
-			shellScript = ". \"$PROJECT_DIR\"/xcodescripts/install-files.sh";
+			shellScript = ". \"$PROJECT_DIR\"/xcodescripts/install-files.sh\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -482,6 +484,7 @@
 				FC2B5BC314B3B82600ECF511 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		FCF25173149DD0A7008F32DD /* Build configuration list for PBXProject "gm4" */ = {
 			isa = XCConfigurationList;
