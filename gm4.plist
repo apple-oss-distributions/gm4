@@ -17,6 +17,10 @@
 	<string>GPL</string>
 	<key>OpenSourceLicenseFile</key>
 	<string>gm4.txt</string>
+	<key>OpenSourceModifications</key>
+	<array>
+		<string>src/freeze.c: check for integer overflow (152114720)</string>
+	</array>
 </dict>
 </array>
 </plist>

@@ -22,6 +22,7 @@
 /* This module handles frozen files.  */
 
 #include "m4.h"
+#include <stdckdint.h>
 
 /*-------------------------------------------------------------------.
 | Destructively reverse a symbol list and return the reversed list.  |
@@ -58,7 +59,7 @@ produce_frozen_state (const char *name)
 
   if (file = fopen (name, O_BINARY ? "wb" : "w"), !file)
     {
-      M4ERROR ((warning_status, errno, name));
+      M4ERROR ((warning_status, errno, "%s", name));
       return;
     }
 
@@ -179,12 +180,15 @@ reload_frozen_state (const char *name)
   int character;
   int operation;
   char *string[2];
-  int allocated[2];
-  int number[2];
+  size_t allocated[2];
+  size_t number[2];
   const builtin *bp;
 
 #define GET_CHARACTER \
   (character = getc (file))
+
+#define OVERFLOW \
+  M4ERROR ((EXIT_FAILURE, 0, "number out of range in frozen state"));
 
 #define GET_NUMBER(Number) \
   do								\
@@ -192,7 +196,9 @@ reload_frozen_state (const char *name)
       (Number) = 0;						\
       while (isdigit (character))				\
 	{							\
-	  (Number) = 10 * (Number) + character - '0';		\
+	  if (ckd_mul(&(Number), 10, (Number)) ||		\
+	      ckd_add(&(Number), (Number), character - '0'))	\
+	    OVERFLOW;						\
 	  GET_CHARACTER;					\
 	}							\
     }								\
@@ -227,9 +233,9 @@ reload_frozen_state (const char *name)
     M4ERROR ((EXIT_FAILURE, errno, "cannot open %s", name));
 
   allocated[0] = 100;
-  string[0] = xmalloc ((size_t) allocated[0]);
+  string[0] = xmalloc (allocated[0]);
   allocated[1] = 100;
-  string[1] = xmalloc ((size_t) allocated[1]);
+  string[1] = xmalloc (allocated[1]);
 
   /* Validate format version.  Only `1' is acceptable for now.  */
   GET_DIRECTIVE;
@@ -281,15 +287,16 @@ reload_frozen_state (const char *name)
 
               /* Get first string contents.  */
 
-              if (number[0] + 1 > allocated[0])
+              if (number[0] >= allocated[0])
                 {
                   free (string[0]);
-                  allocated[0] = number[0] + 1;
-                  string[0] = xmalloc ((size_t) allocated[0]);
+                  if (ckd_add(&allocated[0], number[0], 1))
+		    OVERFLOW;
+                  string[0] = xmalloc (allocated[0]);
                 }
 
               if (number[0] > 0)
-                if (!fread (string[0], (size_t) number[0], 1, file))
+                if (!fread (string[0], number[0], 1, file))
                   M4ERROR ((EXIT_FAILURE, 0, "premature end of frozen file"));
 
               string[0][number[0]] = '\0';
@@ -297,15 +304,16 @@ reload_frozen_state (const char *name)
 
           /* Get second string contents.  */
 
-          if (number[1] + 1 > allocated[1])
+          if (number[1] >= allocated[1])
             {
               free (string[1]);
-              allocated[1] = number[1] + 1;
-              string[1] = xmalloc ((size_t) allocated[1]);
+	      if (ckd_add(&allocated[1], number[1], 1))
+		OVERFLOW;
+              string[1] = xmalloc (allocated[1]);
             }
 
           if (number[1] > 0)
-            if (!fread (string[1], (size_t) number[1], 1, file))
+            if (!fread (string[1], number[1], 1, file))
               M4ERROR ((EXIT_FAILURE, 0, "premature end of frozen file"));
 
           string[1][number[1]] = '\0';
